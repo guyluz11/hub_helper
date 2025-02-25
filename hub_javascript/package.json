@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/guyluz11/hub_js#readme",
   "dependencies": {
+    "@matter/examples": "^0.12.3",
     "@matter/main": "^0.11.9",
     "@project-chip/matter.js": "^0.11.9",
     "ws": "^8.18.1"
