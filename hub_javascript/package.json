@@ -2,9 +2,10 @@
   "name": "hub_js",
   "version": "0.0.1",
   "description": "CyBear Jinni hub helper in javascript in order to use javascript dependencies",
-  "main": "index.js",
+  "main": "index.js// Ch",
   "scripts": {
     "start": "ts-node src/app.ts",
+    "startJS": "node src/integrations/test2",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -16,9 +17,11 @@
   "bugs": {
     "url": "https://github.com/guyluz11/hub_js/issues"
   },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "homepage": "https://github.com/guyluz11/hub_js#readme",
   "dependencies": {
-    "@matter/examples": "^0.12.3",
     "@matter/main": "^0.11.9",
     "@project-chip/matter.js": "^0.11.9",
     "ws": "^8.18.1"
