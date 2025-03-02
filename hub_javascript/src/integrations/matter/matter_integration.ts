@@ -1,9 +1,10 @@
-import { Environment, Logger, StorageService, StorageContext, Time } from "@matter/main";
-import { BasicInformationCluster, DescriptorCluster, GeneralCommissioning, OnOff } from "@matter/main/clusters";
-import { ControllerCommissioningFlowOptions } from "@matter/main/protocol";
+import { Environment, StorageService, Time } from "@matter/main";
+import { BasicInformationCluster, GeneralCommissioning, OnOff } from "@matter/main/clusters";
 import { QrPairingCodeCodec, NodeId } from "@matter/main/types";
 import { CommissioningController, NodeCommissioningOptions } from "@project-chip/matter.js";
 import { NodeStates } from "@project-chip/matter.js/device";
+import { loggerService} from "../../services/logger_service";
+
 
 type CommissioningOptions = {
     ip: string;
@@ -12,14 +13,19 @@ type CommissioningOptions = {
 };
 
 export class MatterAPI {
-    private logger = Logger.get("MatterAPI");
+
+    static _instance: any;
     private environment = Environment.default;
     private  storageService = this.environment.get(StorageService);
     private commissioningController!: CommissioningController;
-    // private  controllerStorage : StorageContext | undefined;
+  
 
     constructor() {
-    }
+        if (MatterAPI._instance) {
+          return MatterAPI._instance
+        }
+        MatterAPI._instance = this;
+      }
 
     async start() {
         const controllerStorage = (await this.storageService.open("controller")).createContext("data");
@@ -39,7 +45,7 @@ export class MatterAPI {
         });
 
         await this.commissioningController.start();
-        this.logger.info("Matter API started");
+        loggerService.log("Matter API started");
     }
 
     async commissionDevice( ip:string, port: number, pairingCode: string) : Promise<NodeId> {
@@ -50,9 +56,9 @@ export class MatterAPI {
         };
     
         const nodeOptions = this.createCommissioningOptions(options);
-        this.logger.info(`Commissioning... ${JSON.stringify(nodeOptions)}`);
+        loggerService.log(`Commissioning... ${JSON.stringify(nodeOptions)}`);
         const nodeId = await this.commissioningController.commissionNode(nodeOptions);
-        this.logger.info(`Commissioning completed with nodeId ${nodeId}`);
+        loggerService.log(`Commissioning completed with nodeId ${nodeId}`);
         return nodeId;
     }
 
@@ -100,12 +106,13 @@ export class MatterAPI {
     async listenForChanges(nodeIdN: bigint | number) {
         const conn = await this.commissioningController.connectNode(NodeId(nodeIdN));
         conn.events.attributeChanged.on(({ path, value }) => {
-            this.logger.info(`Attribute changed: ${path.nodeId}/${path.clusterId}/${path.attributeName} -> ${value}`);
+            loggerService.log(`Attribute changed: ${path.nodeId}/${path.clusterId}/${path.attributeName} -> ${value}`);
         });
         conn.events.stateChanged.on(state => {
-            this.logger.info(`State changed: ${NodeStates[state]}`);
+            loggerService.log(`State changed: ${NodeStates[state]}`);
         });
     }
 }
 
 
+export const matterAPI = new MatterAPI();

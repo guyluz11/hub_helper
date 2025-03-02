@@ -4,8 +4,7 @@
   "description": "CyBear Jinni hub helper in javascript in order to use javascript dependencies",
   "main": "index.js// Ch",
   "scripts": {
-    "start": "ts-node src/app.ts",
-    "start2": "ts-node src/integrations/matter/matter_integration.ts"
+    "start": "ts-node src/app.ts"
   },
   "repository": {
     "type": "git",
@@ -22,10 +21,12 @@
   "homepage": "https://github.com/guyluz11/hub_js#readme",
   "dependencies": {
     "@matter/main": "^0.11.9",
-    "@project-chip/matter.js": "^0.11.9"
+    "@project-chip/matter.js": "^0.11.9",
+    "ws": "^8.18.1"
   },
   "devDependencies": {
     "@types/node": "^22.13.5",
+    "@types/ws": "^8.5.14",
     "typescript": "^5.7.3"
   }
 }
