@@ -1,17 +1,37 @@
 
-// import {pairDevice, turnOnLight, turnOffLight} from './integrations/matter_integration';
-import { test } from './integrations/test';
+// TODO: Ask About logger
+import { Logger } from "@matter/main";
+import {MatterAPI} from './integrations/matter/matter_integration';
+
+const logger = Logger.get("Controller");
 
 
+const matterAPI = new MatterAPI();
 
-// // The device's pairing code (replace this with the actual code you have)
-// const pairingCode = 'MT:Y.K9042C00KA0648G00'; // Replace with your device's pairing code
-// const deviceId = '8'; // Replace with your device's actual ID
+matterAPI.start()
+    .then(() => console.log("Matter API initialized and running"))
+    .catch(error => console.error("Error initializing Matter API:", error));
 
-// pairDevice(pairingCode).then(() => {
-//     turnOnLight(deviceId);
-//     // Or toggle light state
-//     // turnOffLight(deviceId);
-// });
+// TODO: For new device    
+matterAPI.commissionDevice("127.0.0.1", 5540, "MT:Y.K9042C00KA0648G00")
+.then(() => console.log("Commission device"))
+.catch(error => console.error("Error Commission:", error));
 
-test()
+const nodeIdN = 123;
+
+// TODO: Get info of device by device id 
+matterAPI.getDeviceInfo(nodeIdN)
+.then((info: string) => console.log("deviceInfo " + info))
+.catch(error => console.error("Error Commission:", error));
+
+// TODO: Set device state 
+matterAPI.setDeviceOnOff(nodeIdN, true)
+.then(() => console.log("Change device state"))
+.catch(error => console.error("Error Commission:", error));
+
+
+// TODO: Listen for changes
+matterAPI.listenForChanges(nodeIdN)
+.then(() => console.log("Change device state"))
+.catch(error => console.error("Error Commission:", error));
+

@@ -5,8 +5,7 @@
   "main": "index.js// Ch",
   "scripts": {
     "start": "ts-node src/app.ts",
-    "startJS": "node src/integrations/test2",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start2": "ts-node src/integrations/matter/matter_integration.ts"
   },
   "repository": {
     "type": "git",
@@ -23,12 +22,10 @@
   "homepage": "https://github.com/guyluz11/hub_js#readme",
   "dependencies": {
     "@matter/main": "^0.11.9",
-    "@project-chip/matter.js": "^0.11.9",
-    "ws": "^8.18.1"
+    "@project-chip/matter.js": "^0.11.9"
   },
   "devDependencies": {
     "@types/node": "^22.13.5",
-    "ts-node": "^10.9.2",
     "typescript": "^5.7.3"
   }
 }
