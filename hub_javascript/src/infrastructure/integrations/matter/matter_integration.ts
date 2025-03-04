@@ -1,19 +1,21 @@
 import { Environment, StorageService, Time } from "@matter/main";
 import { BasicInformationCluster, GeneralCommissioning, OnOff } from "@matter/main/clusters";
-import { QrPairingCodeCodec, NodeId } from "@matter/main/types";
+import { ManualPairingCodeCodec, QrPairingCodeCodec, NodeId } from "@matter/main/types";
 import { CommissioningController, NodeCommissioningOptions } from "@project-chip/matter.js";
 import { NodeStates } from "@project-chip/matter.js/device";
 import { loggerService} from "../../services/logger_service";
+import { EntityActions } from "../../../domain/from_dart/request_action_types";
+import { RequestActionObject } from "../../../domain/from_dart/request_action_object";
+import { DeviceEntityNotAbstract } from "../../../domain/from_dart/device_entity_base";
 
 
-type CommissioningOptions = {
-    ip: string;
-    port: number;
-    pairingCode: string;
-};
+// type CommissioningOptions = {
+//     ip: string;
+//     port: number;
+//     pairingCode: string;
+// };
 
 export class MatterAPI {
-
     static _instance: any;
     private environment = Environment.default;
     private  storageService = this.environment.get(StorageService);
@@ -48,36 +50,43 @@ export class MatterAPI {
         loggerService.log("Matter API started");
     }
 
-    async commissionDevice( ip:string, port: number, pairingCode: string) : Promise<NodeId> {
-        const options: CommissioningOptions = {
-            ip: ip,  
-            port: port,        
-            pairingCode: pairingCode, 
-        };
-    
-        const nodeOptions = this.createCommissioningOptions(options);
+    async commissionDevice( pairingCode: string) : Promise<NodeId> {
+        const nodeOptions = this.createCommissioningOptions(pairingCode);
         loggerService.log(`Commissioning... ${JSON.stringify(nodeOptions)}`);
         const nodeId = await this.commissioningController.commissionNode(nodeOptions);
         loggerService.log(`Commissioning completed with nodeId ${nodeId}`);
         return nodeId;
     }
 
-    private createCommissioningOptions(options: CommissioningOptions): NodeCommissioningOptions {
-        const { ip, port, pairingCode } = options;
-        const pairingCodeCodec = QrPairingCodeCodec.decode(pairingCode)[0];
-        const setupPin = pairingCodeCodec.passcode;
-        const longDiscriminator = pairingCodeCodec.discriminator;
+    private createCommissioningOptions(pairingCode: string): NodeCommissioningOptions {
 
+        let re = new RegExp("MT:.*");
+        let pcData;
+        let manualPairing;
+        if (re.test(pairingCode)) {
+            pcData = QrPairingCodeCodec.decode(pairingCode)[0];
+        } else {
+            manualPairing = ManualPairingCodeCodec.decode(pairingCode);
+            pcData = manualPairing;
+        }
+        
         return {
             commissioning: {
                 regulatoryLocation: GeneralCommissioning.RegulatoryLocationType.IndoorOutdoor,
                 regulatoryCountryCode: "XX",
             },
             discovery: {
-                knownAddress: { ip, port, type: "udp" },
-                identifierData: { longDiscriminator },
+                identifierData:
+                    pcData.discriminator !== undefined
+                    ? { longDiscriminator : pcData.discriminator }
+                    : manualPairing?.shortDiscriminator !== undefined
+                      ? { shortDiscriminator :  manualPairing.shortDiscriminator }
+                      : {},
+                discoveryCapabilities: {
+                    ble : false,
+                },
             },
-            passcode: setupPin,
+            passcode: pcData.passcode,
         };
     }
 
@@ -111,6 +120,28 @@ export class MatterAPI {
         conn.events.stateChanged.on(state => {
             loggerService.log(`State changed: ${NodeStates[state]}`);
         });
+    }
+
+    async setStateByAction(requestAction: RequestActionObject){
+        if(requestAction.actionType === EntityActions.On){
+            requestAction.entityIds.forEach(async (id) => {
+              const numericId = BigInt(id);
+              await this.setDeviceOnOff(numericId, true);
+            });
+          }
+          if(requestAction.actionType === EntityActions.Off){
+            requestAction.entityIds.forEach(async (id) => {
+              const numericId = BigInt(id);
+              await this.setDeviceOnOff(numericId, false);
+            });
+          }
+    }
+
+
+    async getEntitiesForId(id: NodeId ) : Promise<DeviceEntityNotAbstract[]> {
+
+        
+        return [];
     }
 }
 

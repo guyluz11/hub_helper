@@ -1,4 +1,4 @@
-import { main } from "./setup_manager";
+import { main } from "./infrastructure/setup_manager";
 
 
 main();
