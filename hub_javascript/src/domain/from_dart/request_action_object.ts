@@ -24,9 +24,12 @@ export class RequestActionObject {
     }
 
     // Static method to create an instance from JSON
-    static fromJson(json: RequestActionObjectDtos): RequestActionObject {
+    static fromJson(json: any): RequestActionObject {
+        // const result: string[] = JSON.parse('["6947661118724319617", "2342342"]');
+        const ids: string[] = JSON.parse(json.entitiesId);
+
         return new RequestActionObject(
-            new Set(json.entitiesId),
+             new Set<string>(ids),
             json.property as EntityProperties,
             json.actionType as EntityActions,
             json.vendors ? new Set(json.vendors as VendorsAndServices[]) : undefined,

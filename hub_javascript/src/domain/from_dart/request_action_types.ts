@@ -12,7 +12,7 @@ export enum EntityStateGRPC {
     AddingNewRoutine = "addingNewRoutine",
     AddingNewBinding = "addingNewBinding",
     UpdateHubEntityPropertiesFromRealEntity = "updateHubEntityPropertiesFromRealEntity",
-    AddNewEntityFromJavascriptHub = " addNewEntityFromJavascriptHub",
+    AddNewEntityFromJavascriptHub = "addNewEntityFromJavascriptHub",
 }
 
 export function entityStateGRPCFromString(typeAsString: string): EntityStateGRPC {

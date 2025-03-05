@@ -1,12 +1,14 @@
 import { Environment, StorageService, Time } from "@matter/main";
-import { BasicInformationCluster, GeneralCommissioning, OnOff } from "@matter/main/clusters";
+import { BasicInformationCluster, GeneralCommissioning, OnOff, DescriptorCluster } from "@matter/main/clusters";
 import { ManualPairingCodeCodec, QrPairingCodeCodec, NodeId } from "@matter/main/types";
 import { CommissioningController, NodeCommissioningOptions } from "@project-chip/matter.js";
-import { NodeStates } from "@project-chip/matter.js/device";
+import { NodeStates, PairedNode } from "@project-chip/matter.js/device";
 import { loggerService} from "../../services/logger_service";
-import { EntityActions } from "../../../domain/from_dart/request_action_types";
+import { EntityActions, EntityStateGRPC, EntityTypes, VendorsAndServices } from "../../../domain/from_dart/request_action_types";
 import { RequestActionObject } from "../../../domain/from_dart/request_action_object";
 import { DeviceEntityNotAbstract } from "../../../domain/from_dart/device_entity_base";
+import { simpleClusters } from "./matter_enums";
+import { EntityProperties } from "../../../domain/from_dart/entity_type_utils";
 
 
 // type CommissioningOptions = {
@@ -95,13 +97,6 @@ export class MatterAPI {
        return this.commissioningController.getCommissionedNodes()
     }
 
-
-    async getDeviceInfo(nodeIdN: bigint | number): Promise<string> {
-        const conn = await this.commissioningController.connectNode(NodeId(nodeIdN));
-        const info = conn.getRootClusterClient(BasicInformationCluster);
-        return info ? await info.getProductNameAttribute() : "No BasicInformation Cluster found";
-    }
-
     async setDeviceOnOff(nodeIdN: bigint | number, state: boolean) {
         const conn = await this.commissioningController.connectNode(NodeId(nodeIdN));
         const device = conn.getDevices()[0];
@@ -139,9 +134,47 @@ export class MatterAPI {
 
 
     async getEntitiesForId(id: NodeId ) : Promise<DeviceEntityNotAbstract[]> {
+   
+        const node = await this.commissioningController.connectNode(NodeId(id));
+        const info = node.getRootClusterClient(BasicInformationCluster);
+        const productName = await info?.getProductNameAttribute();
+        const vendorName = await info?.getVendorNameAttribute();
+        // TODO: check if the device name is on the structure
+        const descriptor = node.getRootClusterClient(DescriptorCluster);
+        const deviceType = await this.getTypesForNode(node);
 
+        const entity = new DeviceEntityNotAbstract();
+        entity.entityStateGRPC = EntityStateGRPC.AddNewEntityFromJavascriptHub;
+        // TODO: Might be several types from the same device in the future, would get returnd as defferent entities.
+        entity.entityTypes = deviceType;
+        entity.deviceVendor = vendorName ??'';
+        entity.deviceOriginalName = productName??'';
+        entity.uniqueId = node.nodeId.toString();
+        entity.cbjDeviceVendor = VendorsAndServices.Matter;
         
-        return [];
+
+        return [entity];
+    }
+
+    async getTypesForNode(node: PairedNode): Promise<EntityTypes>{
+        const devices = node.getDevices();
+        const clusterListObj = devices[0].getAllClusterClients();
+        const clusterList : number[] = [];
+        clusterListObj.forEach((c) => {
+            clusterList.push(c.id);
+        });
+        
+        let deviceType = EntityTypes.Undefined;
+
+        // TODO: Use the enum simpleClusters for th evalues
+        if(clusterList.includes(6) ){
+            if( clusterList.includes(8)){
+                deviceType = EntityTypes.DimmableLight;
+            } else {
+                deviceType = EntityTypes.Light;
+            }
+        }
+        return deviceType;
     }
 }
 

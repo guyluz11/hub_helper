@@ -7,7 +7,7 @@ import { RequestActionObject } from '../../domain/from_dart/request_action_objec
 import { DeviceEntityNotAbstract } from '../../domain/from_dart/device_entity_base';
 
 
-const startWebSocketServer = (port = 8080) => {
+const startWebSocketServer = (port = 9080) => {
 
   const wss = new Server({ port: port });
   loggerService.log('Server started');
@@ -34,7 +34,7 @@ const startWebSocketServer = (port = 8080) => {
         }
         else if (data.event === RequestActionObject.event ) {
           await setEntityState(data);
-          responses = ['ok'];
+          responses = ['{"resonse":"ok"}'];
         }
       } catch (error) {
         console.error('Invalid message format:', error);
@@ -49,6 +49,7 @@ const startWebSocketServer = (port = 8080) => {
 
   async function setupDevice(data: any): Promise<DeviceEntityNotAbstract[]>{
     const vendorLogin = VendorLoginEntity.fromJson(data);
+
     if(vendorLogin.vendor === undefined){
       return [];
     }
@@ -58,13 +59,15 @@ const startWebSocketServer = (port = 8080) => {
         return [];
       }
       const deviceId =  await matterAPI.commissionDevice(vendorLogin.pairingCode!);
-      const entities = matterAPI.getEntitiesForId(deviceId);      
-      return entities;
+      return matterAPI.getEntitiesForId(deviceId);      
     }
     return [];
   }
 
   async function setEntityState(data: any) {
+        // TODO: data looks like this 
+// entitiesId =
+// '["14393791580501444205"]'
     const requestAction = RequestActionObject.fromJson(data);
     if (requestAction.vendors?.size === 0) {
       return;

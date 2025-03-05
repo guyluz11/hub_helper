@@ -33,8 +33,7 @@ abstract class DeviceEntityBase {
   entityKey: string;
   requestTimeStamp: string;
   lastResponseFromDeviceTimeStamp: string;
-  entitiyCbjUniqueId: string;
-
+  entityCbjUniqueId: string;
   constructor({
   uniqueId,
   entityUniqueId,
@@ -65,7 +64,7 @@ abstract class DeviceEntityBase {
   entityKey,
   requestTimeStamp,
   lastResponseFromDeviceTimeStamp,
-  entitiyCbjUniqueId,
+  entityCbjUniqueId,
 }: {  uniqueId: string;
     entityUniqueId: string;
     cbjEntityName: string;
@@ -95,7 +94,7 @@ abstract class DeviceEntityBase {
     entityKey: string;
     requestTimeStamp: string;
     lastResponseFromDeviceTimeStamp: string;
-    entitiyCbjUniqueId: string;
+    entityCbjUniqueId: string;
 }) {
 this.uniqueId = uniqueId;
 this.entityUniqueId = entityUniqueId;
@@ -126,11 +125,11 @@ this.devicesMacAddress = devicesMacAddress;
 this.entityKey = entityKey;
 this.requestTimeStamp = requestTimeStamp;
 this.lastResponseFromDeviceTimeStamp = lastResponseFromDeviceTimeStamp;
-this.entitiyCbjUniqueId = entitiyCbjUniqueId;
+this.entityCbjUniqueId = entityCbjUniqueId;
 }
 
 get getCbjEntityId() {
-  return this.entitiyCbjUniqueId;
+  return this.entityCbjUniqueId;
 }
 
 //   toInfrastructure() {
@@ -282,7 +281,7 @@ export class DeviceEntityNotAbstract extends DeviceEntityBase {
     entityKey: 'entityKey is empty',
     requestTimeStamp: 'requestTimeStamp is empty',
     lastResponseFromDeviceTimeStamp: 'lastResponseFromDeviceTimeStamp is empty',
-    entitiyCbjUniqueId: uuidv4(),
+    entityCbjUniqueId: uuidv4(),
     deviceVendor: 'undefined',
     deviceNetworkLastUpdate: 'undefined',
     });
@@ -307,6 +306,8 @@ export class DeviceEntityNotAbstract extends DeviceEntityBase {
     toJSON() {
         return {
         uniqueId: this.uniqueId,
+        // For detos
+        id: this.uniqueId,
         entityUniqueId: this.entityUniqueId,
         cbjEntityName: this.cbjEntityName,
         entityOriginalName: this.entityOriginalName,
@@ -327,15 +328,15 @@ export class DeviceEntityNotAbstract extends DeviceEntityBase {
         deviceLastKnownIp: this.deviceLastKnownIp,
         deviceHostName: this.deviceHostName,
         deviceMdns: this.deviceMdns,
-        srvResourceRecord: this.srvResourceRecord,
-        srvTarget: this.srvTarget,
-        ptrResourceRecord: this.ptrResourceRecord,
+        srvResourceRecord: this.srvResourceRecord.toString(),
+        srvTarget: this.srvTarget.toString(),
+        ptrResourceRecord: this.ptrResourceRecord.toString(),
         mdnsServiceType: this.mdnsServiceType,
         devicesMacAddress: this.devicesMacAddress,
         entityKey: this.entityKey,
         requestTimeStamp: this.requestTimeStamp,
         lastResponseFromDeviceTimeStamp: this.lastResponseFromDeviceTimeStamp,
-        entitiyCbjUniqueId: this.entitiyCbjUniqueId,
+        entityCbjUniqueId: this.entityCbjUniqueId,
         };
     }
 }

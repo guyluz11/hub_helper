@@ -36,13 +36,13 @@ export class VendorLoginEntity {
 
     static fromJson(json: any): VendorLoginEntity {
         return new VendorLoginEntity(json.vendor, {
-            apiKey: json.apiKey,
-            authToken: json.authToken,
-            pairingCode: json.pairingCode,
-            email: json.email,
-            password: json.password,
-            ip: json.ip,
-            port: json.port,
+            apiKey: json.credentials.apiKey,
+            authToken: json.credentials.authToken,
+            pairingCode: json.credentials.pairingCode,
+            email: json.credentials.email,
+            password: json.credentials.password,
+            ip: json.credentials.ip,
+            port: json.credentials.port,
         });
     }
 }
